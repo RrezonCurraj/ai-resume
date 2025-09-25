@@ -2,9 +2,11 @@
 node_modules/** linguist-vendored
 *.min.js linguist-vendored
 *.bundle.js linguist-vendored
+*.min.mjs linguist-vendored
 build/** linguist-vendored
 dist/** linguist-vendored
 .react-router/** linguist-vendored
+package-lock.json linguist-vendored
 
 # Force TypeScript detection for these files
 *.ts linguist-language=TypeScript
