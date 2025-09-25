@@ -1,0 +1,14 @@
+# Tell GitHub to ignore these files in language detection
+node_modules/** linguist-vendored
+*.min.js linguist-vendored
+*.bundle.js linguist-vendored
+build/** linguist-vendored
+dist/** linguist-vendored
+.react-router/** linguist-vendored
+
+# Force TypeScript detection for these files
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Force JavaScript detection for specific files
+*.js linguist-language=JavaScript
