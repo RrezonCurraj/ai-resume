@@ -1,16 +1,13 @@
-import { usePuterStore } from "~/lib/puter";
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { usePuterStore } from '~/lib/puter';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
-export const meta = () => [
-  { title: "Hireon | Auth" },
-  { name: "description", content: "Log into your account" },
-];
+export const meta = () => [{ title: 'Hireon | Auth' }, { name: 'description', content: 'Log into your account' }];
 
 const Auth = () => {
   const { isLoading, auth } = usePuterStore();
   const location = useLocation();
-  const next = location.search.split("next=")[1];
+  const next = location.search.split('next=')[1];
   const navigate = useNavigate();
 
   useEffect(() => {
