@@ -18,7 +18,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { auth, kv } = usePuterStore();
+  const { auth, kv, fs } = usePuterStore();
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLodingResumes] = useState(false);
@@ -62,6 +62,11 @@ export default function Home() {
             {resumes.map((resume) => (
               <ResumeCard key={resume.id} resume={resume} />
             ))}
+            <div className="flex items-center justify-center mt-10">
+              <Link to="/wipe" className="primary-button1">
+                Clear Data
+              </Link>
+            </div>
           </div>
         )}
 
