@@ -58,16 +58,18 @@ export default function Home() {
         )}
 
         {!loadingResumes && resumes.length > 0 && (
-          <div className="resumes-section">
-            {resumes.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} />
-            ))}
+          <>
+            <div className="resumes-section">
+              {resumes.map((resume) => (
+                <ResumeCard key={resume.id} resume={resume} />
+              ))}
+            </div>
             <div className="flex items-center justify-center mt-10">
               <Link to="/wipe" className="primary-button1">
                 Clear Data
               </Link>
             </div>
-          </div>
+          </>
         )}
 
         {!loadingResumes && resumes?.length === 0 && (

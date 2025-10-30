@@ -13,9 +13,13 @@ const Upload = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [resetKey, setResetKey] = useState(0);
 
   const handleFileSelect = (file: File | null) => {
     setFile(file);
+    if (file === null) {
+      setResetKey((k) => k + 1);
+    }
   };
 
   const handleAnalyze = async ({
@@ -118,7 +122,7 @@ const Upload = () => {
 
               <div className="form-div">
                 <label htmlFor="uploader">Upload Resume</label>
-                <FileUploader onFileSelect={handleFileSelect} />
+                <FileUploader onFileSelect={handleFileSelect} key={resetKey} />
               </div>
 
               <button className="primary-button w-full" type="submit">
