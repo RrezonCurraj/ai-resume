@@ -15,7 +15,8 @@
 [![Puter.js](https://img.shields.io/badge/Puter.js-Integrated-FF6B6B?style=flat-square)](https://puter.com/)
 
 </div>
-[Live Demo](https://ai-resumerr.vercel.app)
+
+ **Live Demo** (https://ai-resumerr.vercel.app)
 
 ---
 
