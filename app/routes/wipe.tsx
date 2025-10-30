@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { usePuterStore } from '~/lib/puter';
 import Navbar from '~/components/Navbar';
+import { useLangStore } from '~/lib/lang';
 
 const WipeApp = () => {
   const { auth, isLoading, error, fs, kv } = usePuterStore();
   const navigate = useNavigate();
+  const { lang } = useLangStore();
   const [files, setFiles] = useState<FSItem[]>([]);
   const [resumeCount, setResumeCount] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -64,10 +66,10 @@ const WipeApp = () => {
         <Navbar />
         <section className="main-section">
           <div className="page-heading py-16">
-            <h1>Error</h1>
+            <h1>{lang === 'sq' ? 'Gabim' : 'Error'}</h1>
             <h2>{error}</h2>
             <Link to="/" className="primary-button w-fit text-xl font-semibold mt-8">
-              Go Home
+              {lang === 'sq' ? 'Kthehu në shtëpi' : 'Go Home'}
             </Link>
           </div>
         </section>
@@ -82,15 +84,17 @@ const WipeApp = () => {
       <Navbar />
       <section className="main-section">
         <div className="page-heading py-16">
-          <h1>Clear All App Data</h1>
-          <h2>This action cannot be undone</h2>
+          <h1>{lang === 'sq' ? 'Pastro të gjitha të dhënat e aplikacionit' : 'Clear All App Data'}</h1>
+          <h2>{lang === 'sq' ? 'Ky veprim nuk mund të zhbëhet' : 'This action cannot be undone'}</h2>
         </div>
 
         <div className="max-w-2xl mx-auto">
           <div className="gradient-border p-8 bg-white rounded-2xl">
             <div className="flex flex-col gap-6">
               <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">What will be deleted:</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  {lang === 'sq' ? 'Çfarë do të fshihet:' : 'What will be deleted:'}
+                </h3>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,8 +106,17 @@ const WipeApp = () => {
                       />
                     </svg>
                     <p className="text-gray-700">
-                      <span className="font-semibold">{resumeCount}</span> resume{resumeCount !== 1 ? 's' : ''} and
-                      associated feedback
+                      {lang === 'sq' ? (
+                        <>
+                          <span className="font-semibold">{resumeCount}</span> {resumeCount === 1 ? 'CV' : 'CV'} dhe
+                          feedback-u përkatës
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold">{resumeCount}</span> resume{resumeCount !== 1 ? 's' : ''} and
+                          associated feedback
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -116,8 +129,17 @@ const WipeApp = () => {
                       />
                     </svg>
                     <p className="text-gray-700">
-                      <span className="font-semibold">{files.length}</span> file{files.length !== 1 ? 's' : ''} in
-                      storage
+                      {lang === 'sq' ? (
+                        <>
+                          <span className="font-semibold">{files.length}</span> skedar{files.length !== 1 ? 'ë' : ''} në
+                          ruajtje
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-semibold">{files.length}</span> file{files.length !== 1 ? 's' : ''} in
+                          storage
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -125,17 +147,24 @@ const WipeApp = () => {
 
               {!hasData && (
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600">No data to delete. Your storage is already empty.</p>
+                  <p className="text-gray-600">
+                    {lang === 'sq'
+                      ? 'Nuk ka të dhëna për t’u fshirë. Hapësira juaj tashmë është bosh.'
+                      : 'No data to delete. Your storage is already empty.'}
+                  </p>
                 </div>
               )}
 
               {showConfirmation ? (
                 <div className="flex flex-col gap-4">
                   <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-                    <p className="text-red-800 font-semibold mb-2">⚠️ Final Confirmation</p>
+                    <p className="text-red-800 font-semibold mb-2">
+                      {lang === 'sq' ? '⚠️ Konfirmim Përfundimtar' : '⚠️ Final Confirmation'}
+                    </p>
                     <p className="text-red-700">
-                      Are you absolutely sure? This will permanently delete all your resumes, feedback, and files. This
-                      action cannot be undone.
+                      {lang === 'sq'
+                        ? 'Jeni absolutisht i sigurt? Kjo do të fshijë përgjithmonë të gjitha CV-të, feedback-un dhe skedarët tuaj. Ky veprim nuk mund të zhbëhet.'
+                        : 'Are you absolutely sure? This will permanently delete all your resumes, feedback, and files. This action cannot be undone.'}
                     </p>
                   </div>
                   <div className="flex gap-4">
@@ -144,14 +173,20 @@ const WipeApp = () => {
                       onClick={handleDelete}
                       disabled={isDeleting}
                     >
-                      {isDeleting ? 'Deleting...' : 'Yes, Delete Everything'}
+                      {isDeleting
+                        ? lang === 'sq'
+                          ? 'Duke fshirë...'
+                          : 'Deleting...'
+                        : lang === 'sq'
+                          ? 'Po, Fshij Gjithçka'
+                          : 'Yes, Delete Everything'}
                     </button>
                     <button
                       className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-colors"
                       onClick={() => setShowConfirmation(false)}
                       disabled={isDeleting}
                     >
-                      Cancel
+                      {lang === 'sq' ? 'Anulo' : 'Cancel'}
                     </button>
                   </div>
                 </div>
@@ -163,7 +198,7 @@ const WipeApp = () => {
                       onClick={() => setShowConfirmation(true)}
                       disabled={!hasData}
                     >
-                      Clear All Data
+                      {lang === 'sq' ? 'Pastro të gjitha të dhënat' : 'Clear All Data'}
                     </button>
                   )}
                   <Link
@@ -174,7 +209,7 @@ const WipeApp = () => {
                         : 'bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-colors text-center'
                     }
                   >
-                    Go Back
+                    {lang === 'sq' ? 'Kthehu mbrapa' : 'Go Back'}
                   </Link>
                 </div>
               )}
