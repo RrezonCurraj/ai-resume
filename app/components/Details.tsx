@@ -1,4 +1,5 @@
 import { cn } from '~/lib/utils';
+import { useLangStore } from '~/lib/lang';
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem } from './Accordion';
 
 const ScoreBadge = ({ score }: { score: number }) => {
@@ -70,12 +71,16 @@ const CategoryContent = ({ tips }: { tips: { type: 'good' | 'improve'; tip: stri
 };
 
 const Details = ({ feedback }: { feedback: Feedback }) => {
+  const { lang } = useLangStore();
   return (
     <div className="flex flex-col gap-4 w-full">
       <Accordion>
         <AccordionItem id="tone-style">
           <AccordionHeader itemId="tone-style">
-            <CategoryHeader title="Tone & Style" categoryScore={feedback.toneAndStyle.score} />
+            <CategoryHeader
+              title={lang === 'sq' ? 'Toni & Stili' : 'Tone & Style'}
+              categoryScore={feedback.toneAndStyle.score}
+            />
           </AccordionHeader>
           <AccordionContent itemId="tone-style">
             <CategoryContent tips={feedback.toneAndStyle.tips} />
@@ -83,7 +88,7 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
         </AccordionItem>
         <AccordionItem id="content">
           <AccordionHeader itemId="content">
-            <CategoryHeader title="Content" categoryScore={feedback.content.score} />
+            <CategoryHeader title={lang === 'sq' ? 'Përmbajtja' : 'Content'} categoryScore={feedback.content.score} />
           </AccordionHeader>
           <AccordionContent itemId="content">
             <CategoryContent tips={feedback.content.tips} />
@@ -91,7 +96,10 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
         </AccordionItem>
         <AccordionItem id="structure">
           <AccordionHeader itemId="structure">
-            <CategoryHeader title="Structure" categoryScore={feedback.structure.score} />
+            <CategoryHeader
+              title={lang === 'sq' ? 'Struktura' : 'Structure'}
+              categoryScore={feedback.structure.score}
+            />
           </AccordionHeader>
           <AccordionContent itemId="structure">
             <CategoryContent tips={feedback.structure.tips} />
@@ -99,7 +107,7 @@ const Details = ({ feedback }: { feedback: Feedback }) => {
         </AccordionItem>
         <AccordionItem id="skills">
           <AccordionHeader itemId="skills">
-            <CategoryHeader title="Skills" categoryScore={feedback.skills.score} />
+            <CategoryHeader title={lang === 'sq' ? 'Aftësitë' : 'Skills'} categoryScore={feedback.skills.score} />
           </AccordionHeader>
           <AccordionContent itemId="skills">
             <CategoryContent tips={feedback.skills.tips} />

@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { formatSize } from '../lib/utils';
+import { useLangStore } from '~/lib/lang';
 
 interface FileUploaderProps {
   onFileSelect?: (file: File | null) => void;
 }
 
 const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
+  const { lang } = useLangStore();
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const file = acceptedFiles[0] || null;
@@ -58,9 +60,21 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                 <img src="/icons/info.svg" alt="upload" className="size-20" />
               </div>
               <p className="text-lg text-gray-500">
-                <span className="font-semibold">Click to upload</span> or drag and drop
+                {lang === 'sq' ? (
+                  <>
+                    <span className="font-semibold">Kliko për të ngarkuar</span> ose tërhiq dhe lësho
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </>
+                )}
               </p>
-              <p className="text-lg text-gray-500">PDF (max {formatSize(maxFileSize)})</p>
+              <p className="text-lg text-gray-500">
+                {lang === 'sq' ? 'PDF (maksimumi ' : 'PDF (max '}
+                {formatSize(maxFileSize)}
+                {lang === 'sq' ? ')' : ')'}
+              </p>
             </div>
           )}
         </div>

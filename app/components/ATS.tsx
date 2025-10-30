@@ -1,6 +1,8 @@
 import { cn } from '~/lib/utils';
+import { useLangStore } from '~/lib/lang';
 
 const ATS = ({ score, suggestions }: { score: number; suggestions: { type: 'good' | 'improve'; tip: string }[] }) => {
+  const { lang } = useLangStore();
   return (
     <div
       className={cn(
@@ -14,12 +16,20 @@ const ATS = ({ score, suggestions }: { score: number; suggestions: { type: 'good
           alt="ATS"
           className="w-10 h-10"
         />
-        <p className="text-2xl font-semibold">ATS Score - {score}/100</p>
+        <p className="text-2xl font-semibold">
+          {lang === 'sq' ? 'Pikët ATS' : 'ATS Score'} - {score}/100
+        </p>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="font-medium text-xl">How well does your resume pass through Applicant Tracking Systems?</p>
+        <p className="font-medium text-xl">
+          {lang === 'sq'
+            ? 'Sa mirë kalon CV-ja juaj nëpër Sistemet e Gjurmimit të Aplikimeve (ATS)?'
+            : 'How well does your resume pass through Applicant Tracking Systems?'}
+        </p>
         <p className="text-lg text-gray-500">
-          Your resume was scanned like an employer would. Here's how it performed:
+          {lang === 'sq'
+            ? 'CV-ja juaj u skanua siç do ta bënte një punëdhënës. Ja si performoi:'
+            : "Your resume was scanned like an employer would. Here's how it performed:"}
         </p>
         {suggestions.map((suggestion, index) => (
           <div className="flex flex-row gap-2 items-center" key={index}>
@@ -32,7 +42,9 @@ const ATS = ({ score, suggestions }: { score: number; suggestions: { type: 'good
           </div>
         ))}
         <p className="text-lg text-gray-500">
-          Want a better score? Improve your resume by applying the suggestions listed below.
+          {lang === 'sq'
+            ? 'Doni një rezultat më të mirë? Përmirësoni CV-në duke aplikuar sugjerimet e listuara më poshtë.'
+            : 'Want a better score? Improve your resume by applying the suggestions listed below.'}
         </p>
       </div>
     </div>

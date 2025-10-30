@@ -4,6 +4,7 @@ import ATS from '~/components/ATS';
 import Details from '~/components/Details';
 import Summary from '~/components/Summary';
 import { usePuterStore } from '~/lib/puter';
+import { useLangStore } from '~/lib/lang';
 
 export const meta = () => [
   { title: 'Hireon | Review' },
@@ -12,6 +13,7 @@ export const meta = () => [
 
 const Resume = () => {
   const { auth, isLoading, fs, kv } = usePuterStore();
+  const { lang } = useLangStore();
   const { id } = useParams();
   const [imageUrl, setImageUrl] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
@@ -54,7 +56,9 @@ const Resume = () => {
       <nav className="resume-nav">
         <Link to="/" className="back-button flex items-center gap-2">
           <img src="/icons/back.svg" alt="back" className="w-2.5 h-2.5" />
-          <span className="text-gray-800 text-sm font-semibold">Back to Homepage</span>
+          <span className="text-gray-800 text-sm font-semibold">
+            {lang === 'sq' ? 'Kthehu në faqen kryesore' : 'Back to Homepage'}
+          </span>
         </Link>
       </nav>
 
@@ -74,7 +78,7 @@ const Resume = () => {
           )}
         </section>
         <section className="feedback-section">
-          <h2 className="text-4xl !text-black font-bold"> Resume Review</h2>
+          <h2 className="text-4xl !text-black font-bold">{lang === 'sq' ? 'Vlerësimi i CV-së' : 'Resume Review'}</h2>
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />
