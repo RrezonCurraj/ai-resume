@@ -32,3 +32,4 @@ pnpm-debug.log*
 # Kluster
 .cursor/rules/kluster-code-verify.mdc
 .kluster
+.cursor/
