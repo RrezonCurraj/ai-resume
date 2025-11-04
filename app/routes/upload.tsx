@@ -13,6 +13,7 @@ const Upload = () => {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
+  const [errorText, setErrorText] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const { lang } = useLangStore();
   const [resetKey, setResetKey] = useState(0);
@@ -36,52 +37,154 @@ const Upload = () => {
     file: File;
   }) => {
     setIsProcessing(true);
+    setErrorText('');
 
-    setStatusText(lang === 'sq' ? 'Duke ngarkuar skedarin...' : 'Uploading the file...');
-    const uploadedFile = await fs.upload([file]);
-    if (!uploadedFile)
-      return setStatusText(lang === 'sq' ? 'Gabim: Dështoi ngarkimi i skedarit' : 'Error: Failed to upload file');
+    let shouldResetProcessing = true;
+    try {
+      setStatusText(lang === 'sq' ? 'Duke ngarkuar skedarin...' : 'Uploading the file...');
+      const uploadedFile = await fs.upload([file]);
+      if (!uploadedFile) {
+        throw new Error(lang === 'sq' ? 'Gabim: Dështoi ngarkimi i skedarit' : 'Error: Failed to upload file');
+      }
 
-    setStatusText(lang === 'sq' ? 'Duke konvertuar në imazh...' : 'Converting to image...');
-    const imageFile = await convertPdfToImage(file);
-    if (!imageFile.file)
-      return setStatusText(
-        lang === 'sq' ? 'Gabim: Dështoi konvertimi i PDF në imazh' : 'Error: Failed to convert PDF to image'
-      );
+      setStatusText(lang === 'sq' ? 'Duke konvertuar në imazh...' : 'Converting to image...');
+      const imageFile = await convertPdfToImage(file);
+      if (!imageFile.file) {
+        throw new Error(
+          imageFile.error ??
+            (lang === 'sq' ? 'Gabim: Dështoi konvertimi i PDF në imazh' : 'Error: Failed to convert PDF to image')
+        );
+      }
 
-    setStatusText(lang === 'sq' ? 'Duke ngarkuar imazhin...' : 'Uploading the image...');
-    const uploadedImage = await fs.upload([imageFile.file]);
-    if (!uploadedImage)
-      return setStatusText(lang === 'sq' ? 'Gabim: Dështoi ngarkimi i imazhit' : 'Error: Failed to upload image');
+      setStatusText(lang === 'sq' ? 'Duke ngarkuar imazhin...' : 'Uploading the image...');
+      const uploadedImage = await fs.upload([imageFile.file]);
+      if (!uploadedImage) {
+        throw new Error(lang === 'sq' ? 'Gabim: Dështoi ngarkimi i imazhit' : 'Error: Failed to upload image');
+      }
 
-    setStatusText(lang === 'sq' ? 'Duke përgatitur të dhënat...' : 'Preparing data...');
-    const uuid = generateUUID();
-    const data = {
-      id: uuid,
-      resumePath: uploadedFile.path,
-      imagePath: uploadedImage.path,
-      companyName,
-      jobTitle,
-      jobDescription,
-      lang,
-      feedback: '',
-    };
-    await kv.set(`resume:${uuid}`, JSON.stringify(data));
+      setStatusText(lang === 'sq' ? 'Duke përgatitur të dhënat...' : 'Preparing data...');
+      const uuid = generateUUID();
+      const data = {
+        id: uuid,
+        resumePath: uploadedFile.path,
+        imagePath: uploadedImage.path,
+        companyName,
+        jobTitle,
+        jobDescription,
+        lang,
+        feedback: '',
+      };
+      await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
-    setStatusText(lang === 'sq' ? 'Duke analizuar...' : 'Analyzing...');
+      setStatusText(lang === 'sq' ? 'Duke analizuar...' : 'Analyzing...');
 
-    const feedback = await ai.feedback(uploadedFile.path, prepareInstructions({ jobTitle, jobDescription, lang }));
-    if (!feedback)
-      return setStatusText(lang === 'sq' ? 'Gabim: Dështoi analiza e CV-së' : 'Error: Failed to analyze resume');
+      const feedback = await ai.feedback(uploadedFile.path, prepareInstructions({ jobTitle, jobDescription, lang }));
+      if (!feedback) {
+        throw new Error(lang === 'sq' ? 'Gabim: Dështoi analiza e CV-së' : 'Error: Failed to analyze resume');
+      }
 
-    const feedbackText =
-      typeof feedback.message.content === 'string' ? feedback.message.content : feedback.message.content[0].text;
+      const maybeFailure = feedback as { success?: boolean; error?: string };
+      if (maybeFailure && 'success' in maybeFailure && maybeFailure.success === false) {
+        throw new Error(
+          maybeFailure.error ??
+            (lang === 'sq' ? 'Gabim: Analiza e Puter AI nuk u krye' : 'Error: Puter AI failed to analyze the resume')
+        );
+      }
 
-    data.feedback = JSON.parse(feedbackText);
-    await kv.set(`resume:${uuid}`, JSON.stringify(data));
-    setStatusText(lang === 'sq' ? 'Analiza përfundoi, po ridrejtohesh...' : 'Analysis complete, redirecting...');
-    console.log(data);
-    navigate(`/resume/${uuid}`);
+      const rawContent = (feedback as { message?: { content?: unknown } }).message?.content;
+      if (!rawContent) {
+        throw new Error(
+          lang === 'sq' ? 'Gabim: Nuk u mor përgjigje nga analiza' : 'Error: Did not receive analysis content from AI'
+        );
+      }
+      let feedbackText = '';
+
+      if (typeof rawContent === 'string') {
+        feedbackText = rawContent;
+      } else if (Array.isArray(rawContent)) {
+        feedbackText = rawContent
+          .map((chunk) => {
+            if (typeof chunk === 'string') return chunk;
+            if (chunk && typeof chunk === 'object' && 'text' in chunk && typeof chunk.text === 'string') {
+              return chunk.text;
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n');
+      }
+
+      feedbackText = feedbackText
+        .replace(/```json/i, '')
+        .replace(/```/g, '')
+        .trim();
+
+      if (!feedbackText) {
+        throw new Error(
+          lang === 'sq'
+            ? 'Gabim: Formati i përgjigjes nga analiza ishte bosh'
+            : 'Error: Received empty analysis response'
+        );
+      }
+
+      const parseFeedbackJson = (text: string) => {
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          const firstBrace = text.indexOf('{');
+          const lastBrace = text.lastIndexOf('}');
+          if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+            return null;
+          }
+          const sliced = text.slice(firstBrace, lastBrace + 1);
+          try {
+            return JSON.parse(sliced);
+          } catch (innerError) {
+            console.error('Failed to parse AI feedback JSON', { error: innerError, text });
+            return null;
+          }
+        }
+      };
+
+      const parsedFeedback = parseFeedbackJson(feedbackText);
+      if (!parsedFeedback) {
+        throw new Error(
+          lang === 'sq'
+            ? 'Gabim: Formati i përgjigjes nga analiza ishte i pavlefshëm'
+            : 'Error: Received invalid analysis format'
+        );
+      }
+
+      data.feedback = parsedFeedback;
+      await kv.set(`resume:${uuid}`, JSON.stringify(data));
+      setStatusText(lang === 'sq' ? 'Analiza përfundoi, po ridrejtohesh...' : 'Analysis complete, redirecting...');
+      console.log(data);
+      navigate(`/resume/${uuid}`);
+      shouldResetProcessing = false;
+    } catch (error) {
+      console.error('handleAnalyze failed', error);
+      const fallbackMessage =
+        lang === 'sq'
+          ? 'Gabim: Diçka shkoi keq gjatë analizës së CV-së'
+          : 'Error: Something went wrong while analyzing the resume';
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string' && error
+            ? error
+            : error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+              ? error.message
+              : fallbackMessage;
+      if (message === fallbackMessage && error) {
+        console.error('Unhandled error shape from Puter AI', { error });
+      }
+      setStatusText(message);
+      setErrorText(message);
+    } finally {
+      if (shouldResetProcessing) {
+        setIsProcessing(false);
+      }
+    }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -158,6 +261,7 @@ const Upload = () => {
               </button>
             </form>
           )}
+          {!isProcessing && errorText && <p className="text-center text-red-600 font-semibold mt-6">{errorText}</p>}
         </div>
       </section>
     </main>

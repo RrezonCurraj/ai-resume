@@ -313,24 +313,44 @@ export const usePuterStore = create<PuterStore>((set, get) => {
       return;
     }
 
-    return puter.ai.chat(
-      [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'file',
-              puter_path: path,
-            },
-            {
-              type: 'text',
-              text: message,
-            },
-          ],
-        },
-      ],
-      { model: 'claude-3-7-sonnet' }
-    ) as Promise<AIResponse | undefined>;
+    const payload: ChatMessage[] = [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'file',
+            puter_path: path,
+          },
+          {
+            type: 'text',
+            text: message,
+          },
+        ],
+      },
+    ];
+
+    const candidateModels = ['claude-3-7-sonnet', 'claude-3-haiku', 'gpt-4o-mini', undefined] as const;
+
+    for (const model of candidateModels) {
+      try {
+        const options = model ? { model } : undefined;
+        const response = (await puter.ai.chat(payload, options)) as AIResponse | { success?: boolean; error?: string };
+        if (!response) {
+          continue;
+        }
+        if (typeof response === 'object' && 'success' in response && response.success === false) {
+          console.warn(`Puter AI model "${model ?? 'default'}" failed`, response.error);
+          continue;
+        }
+        console.info(`Puter AI model "${model ?? 'default'}" succeeded`);
+        return response as AIResponse;
+      } catch (error) {
+        console.warn(`Puter AI model "${model ?? 'default'}" threw`, error);
+        continue;
+      }
+    }
+
+    return undefined;
   };
 
   const img2txt = async (image: string | File | Blob, testMode?: boolean) => {
