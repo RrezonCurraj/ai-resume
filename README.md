@@ -20,6 +20,28 @@
 
 ---
 
+## 📸 Screenshots
+
+### 🖥️ Desktop View
+<img src="./screenshots/landing-desktop.png" width="100%" />
+<br/>
+<img src="./screenshots/resume-review-desktop.png" width="100%" />
+
+## 📱 Mobile View
+
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+  <img src="./screenshots/landing-mobile.png" width="49%" />
+
+  <img src="./screenshots/form-mobile.png" width="49%" />
+
+  <img src="./screenshots/analyzing-mobile.png" width="49%" />
+
+  <img src="./screenshots/results-mobile.png" width="49%" />
+
+</div>
+
+
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
